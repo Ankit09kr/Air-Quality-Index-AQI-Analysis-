@@ -8,7 +8,7 @@ The dataset contains the following key columns:
 
 - `Date`: The date of AQI recording
 - `City`: City name
-- `State`: State name
+- `State`: State name 
 - `AQI`: Numerical Air Quality Index value
 - `AQI_Bucket`: Categorical classification of AQI (e.g., Good, Moderate, Poor, etc.)
 
