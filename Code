@@ -1,0 +1,103 @@
+
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+df = pd.read_csv("C:/Users/ak825/Downloads/Air Quality Index Dataset.csv")
+df
+
+df.drop_duplicates(inplace=True)
+df['last_update'] = pd.to_datetime(df['last_update'], errors='coerce')
+df = df.dropna(subset=['pollutant_avg'])
+df
+
+"""Objective 2: Top Polluted Cities"""
+
+top_polluted = (
+    df.groupby('city')['pollutant_avg']
+    .mean()
+    .sort_values(ascending=False)
+    .head(10)
+)
+plt.figure(figsize=(10, 6))
+sns.barplot(x=top_polluted.values, y=top_polluted.index, palette="Reds_r")
+plt.title("Top 10 Most Polluted Cities (by Avg Pollutant Level)")
+plt.xlabel("Average Pollutant Level")
+plt.tight_layout()
+plt.savefig("top_polluted_cities.png")
+plt.show()
+plt.close()
+
+""" Objective 3: Pollution by Pollutant Type"""
+
+pollutant_stats = df.groupby('pollutant_id')['pollutant_avg'].mean().sort_values()
+plt.figure(figsize=(8, 6))
+sns.barplot(x=pollutant_stats.values, y=pollutant_stats.index, palette="Blues_d")
+plt.title("Average Pollution by Pollutant Type")
+plt.xlabel("Average Level")
+plt.tight_layout()
+plt.savefig("pollution_by_type.png")
+plt.show()
+plt.close()
+
+""" Objective 4: Geospatial Visualization"""
+
+map_data = df[['latitude', 'longitude', 'pollutant_avg']].dropna()
+plt.figure(figsize=(10, 6))
+sc = plt.scatter(
+    map_data['longitude'], map_data['latitude'],
+    c=map_data['pollutant_avg'], cmap='Reds', alpha=0.7, marker='o'
+)
+plt.colorbar(sc, label='Pollutant Level')
+plt.title("Geospatial Pollution Visualization")
+plt.xlabel("Longitude")
+plt.ylabel("Latitude")
+plt.tight_layout()
+plt.savefig("pollution_scatter_map.png")
+plt.show()
+plt.close()
+
+"""Objective 5: Pollutant Level Category Distribution"""
+
+def categorize_pollution(value):
+    if value <= 50:
+        return 'Low'
+    elif value <= 100:
+        return 'Moderate'
+    else:
+        return 'High'
+
+df['pollution_category'] = df['pollutant_avg'].apply(categorize_pollution)
+category_counts = df['pollution_category'].value_counts()
+plt.figure(figsize=(6, 6))
+category_counts.plot.pie(autopct='%1.1f%%', colors=['green', 'orange', 'red'])
+plt.title('Pollution Level Category Distribution')
+plt.ylabel('')
+plt.tight_layout()
+plt.savefig("pollution_category_distribution.png")
+plt.show()
+plt.close()
+
+"""***6
+. Scatter + Regression - Min vs Max***
+"""
+
+sns.regplot(x='pollutant_min', y='pollutant_max', data=df, scatter_kws={'alpha': 0.5}, line_kws={'color': 'red'})
+plt.title('Pollutant Min vs Max (Regression)')
+plt.xlabel('Min')
+plt.ylabel('Max')
+plt.show()
+
+"""
+
+**# 7. Heatmap - Correlation**
+```
+
+"""
+
+cols = ['pollutant_min', 'pollutant_max', 'pollutant_avg']
+sns.heatmap(df[cols].corr(), annot=True, cmap='coolwarm', square=True)
+plt.title('Correlation Heatmap')
+plt.show()
